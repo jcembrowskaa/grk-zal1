@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GRK Trening W1–W4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column of question cards under a sticky filter bar; pixel-grid motif from the raster world */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --surface-2:#e9edf5; --fg:#151a26; --muted:#5a6377; --line:#d3d9e6;
+  --accent:#2c46c9; --accent-soft:#e3e8fb; --on-accent:#ffffff;
+  --r:#d6304a; --g:#1f9a55; --b:#2c6fe0;
+  --ok:#1d7f48; --ok-soft:#e1f3e8; --bad:#c2263e; --bad-soft:#fbe4e8; --warn:#a6670a; --warn-soft:#fbefd9;
+  --pix:#2c46c9; --pix-ideal:#d6304a; --grid:#c6cddc;
+  --f-display:"Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f121a; --surface:#171b26; --surface-2:#1f2533; --fg:#e6e9f2; --muted:#9aa3b8; --line:#2c3344;
+  --accent:#8fa2ff; --accent-soft:#232c4d; --on-accent:#0f121a;
+  --r:#ff6b7f; --g:#4fd28a; --b:#6aa3ff;
+  --ok:#5fd394; --ok-soft:#173326; --bad:#ff7a8d; --bad-soft:#3a1c24; --warn:#f2b45a; --warn-soft:#382a14;
+  --pix:#8fa2ff; --pix-ideal:#ff6b7f; --grid:#343c50; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f121a; --surface:#171b26; --surface-2:#1f2533; --fg:#e6e9f2; --muted:#9aa3b8; --line:#2c3344;
+  --accent:#8fa2ff; --accent-soft:#232c4d; --on-accent:#0f121a;
+  --r:#ff6b7f; --g:#4fd28a; --b:#6aa3ff;
+  --ok:#5fd394; --ok-soft:#173326; --bad:#ff7a8d; --bad-soft:#3a1c24; --warn:#f2b45a; --warn-soft:#382a14;
+  --pix:#8fa2ff; --pix-ideal:#ff6b7f; --grid:#343c50; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:820px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+.head{padding-block:40px 20px;display:grid;gap:14px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px}
+.rgb{display:inline-flex;gap:2px}
+.rgb i{width:5px;height:14px;display:block;border-radius:1px}
+.rgb i:nth-child(1){background:var(--r)}.rgb i:nth-child(2){background:var(--g)}.rgb i:nth-child(3){background:var(--b)}
+h1{font-size:clamp(30px,6vw,44px);line-height:1.05;font-weight:700;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stats b{color:var(--fg);font-weight:600}
+.bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;display:flex}
+.bar span{display:block;height:100%}
+.bar .k{background:var(--ok)}.bar .rv{background:var(--warn)}
+
+/* filters */
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:64px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip.ghost{background:transparent}
+.spacer{flex:1}
+
+/* list */
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding-block:16px 6px}
+.list{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;display:grid;gap:12px;min-width:0}
+.card.known{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.card.review{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+.tag{padding:2px 8px;border-radius:4px;background:var(--surface-2)}
+.tag.lec{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.diff{display:inline-flex;gap:2px;align-items:center}
+.diff i{width:7px;height:7px;background:var(--line);display:block}
+.diff i.on{background:var(--accent)}
+.state{margin-left:auto;padding:2px 8px;border-radius:4px}
+.state.k{background:var(--ok-soft);color:var(--ok)}.state.r{background:var(--warn-soft);color:var(--warn)}
+.q{font-size:17px;font-weight:500;margin:0}
+.q code,.ans code,.opt code{font-family:var(--f-mono);font-size:.9em;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.opts{display:grid;gap:6px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 12px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.opt .k{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.calc{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.calc input{width:160px;max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.calc .unit{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:500;font-size:14px}
+.btn.sec{background:transparent;color:var(--accent)}
+.btn.okb{border-color:var(--ok);background:transparent;color:var(--ok)}
+.btn.rvb{border-color:var(--warn);background:transparent;color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.verdict{font-weight:600;font-size:14px}
+.verdict.ok{color:var(--ok)}.verdict.bad{color:var(--bad)}
+.ans{border-top:1px dashed var(--line);padding-top:12px;display:grid;gap:8px;min-width:0}
+.ans p,.ans ul,.ans ol{margin:0}
+.ans ul,.ans ol{padding-left:20px}
+.ans li+li{margin-top:3px}
+.ans .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.steps{font-family:var(--f-mono);font-size:13.5px;background:var(--surface-2);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre;line-height:1.6;font-variant-numeric:tabular-nums}
+.gridbox{overflow-x:auto}
+.gridbox svg{display:block;max-width:100%;height:auto}
+.empty{color:var(--muted);padding:24px 0}
+.foot{color:var(--muted);font-size:13px;margin-top:28px}
+@media (max-width:520px){.row .lbl{min-width:100%}.q{font-size:16px}}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow"><span class="rgb"><i></i><i></i><i></i></span>Grafika Komputerowa · PJATK · wykłady I–IV</div>
+    <h1>GRK Trening W1–W4</h1>
+    <p class="lede">Pytania z pierwszych czterech wykładów: pojęcia, testy jednokrotnego wyboru i zadania obliczeniowe z pełnymi rozwiązaniami. Odpowiedz, sprawdź, a potem oznacz pytanie jako opanowane albo do powtórki. Postęp zapisuje się w tej przeglądarce.</p>
+    <div class="stats" id="stats"></div>
+    <div class="bar" id="bar"><span class="k"></span><span class="rv"></span></div>
+  </header>
+
+  <nav class="filters" aria-label="Filtry">
+    <div class="row" id="f-lec"><span class="lbl">Wykład</span></div>
+    <div class="row" id="f-type"><span class="lbl">Typ</span></div>
+    <div class="row">
+      <span class="lbl">Widok</span>
+      <button class="chip" id="f-status-all" aria-pressed="true">Wszystkie</button>
+      <button class="chip" id="f-status-new" aria-pressed="false">Nieprzerobione</button>
+      <button class="chip" id="f-status-rev" aria-pressed="false">Do powtórki</button>
+      <span class="spacer"></span>
+      <button class="chip ghost" id="shuffle">Przetasuj</button>
+      <button class="chip ghost" id="reset">Wyczyść postęp</button>
+    </div>
+  </nav>
+
+  <div class="count" id="count"></div>
+  <main class="list" id="list"></main>
+  <p class="foot">Źródło: materiały wykładowe GRK, J. Zabrodzki (gakko.pjwstk.edu.pl, materiały 1927, wykłady I–IV). Zadania oznaczone jako „z wykładu” pochodzą z listy pytań na końcu wykładu; pozostałe są dodatkowe, ułożone na podstawie treści.</p>
+</div>
+
+<script>
+/* ---------- pixel grid renderer ---------- */
+function grid(o){
+  // o: {x0,y0,x1,y1, px:[[x,y]...], line:[[x,y],[x,y]] | circle:r, title}
+  const cs=28, pad=26;
+  const W=(o.x1-o.x0+1), H=(o.y1-o.y0+1);
+  const w=W*cs+pad+8, h=H*cs+pad+8;
+  const X=x=>pad+(x-o.x0)*cs+cs/2, Y=y=>8+(o.y1-y)*cs+cs/2;
+  let s=`<svg viewBox="0 0 ${w} ${h}" width="${w}" role="img" aria-label="${o.title||'Siatka pikseli'}">`;
+  for(let x=o.x0;x<=o.x1;x++)for(let y=o.y0;y<=o.y1;y++){
+    s+=`<rect x="${X(x)-cs/2}" y="${Y(y)-cs/2}" width="${cs}" height="${cs}" fill="none" stroke="var(--grid)" stroke-width="1"/>`;}
+  (o.px||[]).forEach(([x,y],i)=>{s+=`<rect x="${X(x)-cs/2+2}" y="${Y(y)-cs/2+2}" width="${cs-4}" height="${cs-4}" rx="2" fill="var(--pix)" opacity=".85"/>`;
+    if(o.num) s+=`<text x="${X(x)}" y="${Y(y)+4}" text-anchor="middle" font-size="11" font-family="var(--f-mono)" fill="var(--on-accent)">${i}</text>`;});
+  if(o.line){const[[a,b],[c,d]]=o.line;s+=`<line x1="${X(a)}" y1="${Y(b)}" x2="${X(c)}" y2="${Y(d)}" stroke="var(--pix-ideal)" stroke-width="2"/>`;}
+  if(o.circle){const r=o.circle;let p='';for(let t=0;t<=45.01;t+=1){const a=(90-t)*Math.PI/180;p+=(t?'L':'M')+X(r*Math.cos(a)).toFixed(1)+' '+Y(r*Math.sin(a)).toFixed(1);}
+    s+=`<path d="${p}" fill="none" stroke="var(--pix-ideal)" stroke-width="2"/>`;}
+  for(let x=o.x0;x<=o.x1;x++) s+=`<text x="${X(x)}" y="${h-4}" text-anchor="middle" font-size="10" font-family="var(--f-mono)" fill="var(--muted)">${x}</text>`;
+  for(let y=o.y0;y<=o.y1;y++) s+=`<text x="${pad-6}" y="${Y(y)+3}" text-anchor="end" font-size="10" font-family="var(--f-mono)" fill="var(--muted)">${y}</text>`;
+  return `<div class="gridbox">${s}</svg></div>`;
+}
+
+/* ---------- question bank ---------- */
+// type: open | mc | calc ; d: difficulty 1-3 ; src: true = pytanie z listy na końcu wykładu
+const Q=[
+/* ================= WYKŁAD I ================= */
+{lec:1,type:'open',d:1,q:'Czym różni się cel grafiki komputerowej od celu przetwarzania obrazów?',
+a:`<p><b>Grafika komputerowa</b> generuje <i>nowe</i> obrazy, odpowiednie dla określonego zastosowania; jednym z jej zadań jest uzyskanie jakości jak najbliższej obrazom ze świata rzeczywistego.</p>
+<p><b>Przetwarzanie obrazów</b> przekształca <i>istniejące</i> obrazy cyfrowe do innej postaci, np. w celu poprawy jakości: zmiana rozdzielczości, kolorystyki lub treści, wyróżnianie obszarów, kompresja. Często wykonuje się je w fazie postprocessingu.</p>`},
+{lec:1,type:'open',d:1,q:'Wymień trzy sposoby uzyskania obrazu cyfrowego podane na wykładzie.',
+a:`<ol><li>Zdjęcie z aparatu cyfrowego.</li><li>Skan dokumentu.</li><li>Wynik obliczeń metodami grafiki komputerowej (najczęściej w aplikacji do generowania obrazów).</li></ol>`},
+{lec:1,type:'open',d:2,q:'Dlaczego obrazy generowane w grafice komputerowej są zawsze uproszczeniem rzeczywistości? Podaj oba źródła ograniczeń.',
+a:`<ul><li><b>Ograniczona moc obliczeniowa</b> dostępnego sprzętu — metody muszą być na tyle proste, by zdążyć z obliczeniami.</li>
+<li><b>Ograniczenia urządzeń wyświetlających</b>: wymagana częstotliwość wyświetlania obrazów, dostępna rozdzielczość, dostępna dynamika jasności.</li></ul>`},
+{lec:1,type:'open',d:2,src:true,q:'Wyjaśnij różnice między grafiką 2D a grafiką 3D.',
+a:`<p><b>Grafika 2D</b> operuje obiektami na płaszczyźnie: linie proste, krzywe, figury płaskie, odręczne rysunki, teksty. Typowe operacje: rysowanie, wypełnianie wnętrz, przekształcenia geometryczne (przesuwanie, obroty, skalowanie), wymiarowanie. Cecha charakterystyczna: <b>brak problemów związanych z oświetleniem</b>. Programy: Corel Draw, Illustrator, Inkscape (darmowy).</p>
+<p><b>Grafika 3D</b> tworzy sceny z obiektami 3D. Kluczowe są <b>źródła światła</b>, a więc konieczność <b>cieniowania</b> powierzchni (wyznaczania ich barw) i wyznaczania <b>cieni rzucanych</b>. Po modelowaniu umieszcza się w scenie <b>kamerę</b>, z której punktu widzenia wyznacza się widok 2D sceny; przejście scena 3D → widok 2D to <b>rendering</b>. Programy: 3D Studio Max, Blender (darmowy).</p>`},
+{lec:1,type:'mc',d:1,q:'Która operacja NIE występuje jako problem w typowej grafice 2D?',opts:['Przekształcenia geometryczne (obrót, skalowanie)','Wypełnianie wnętrz figur','Wyznaczanie barw powierzchni na podstawie oświetlenia','Wymiarowanie'],c:2,
+a:`<p>Wykład podkreśla, że cechą grafiki 2D jest <b>brak problemów związanych z oświetleniem</b>. Cieniowanie wynikające ze źródeł światła to domena grafiki 3D.</p>`},
+{lec:1,type:'open',d:2,q:'Na czym polega różnica między obiektowym a obrazowym podejściem do renderingu?',
+a:`<p><b>Obiektowe</b> (koncepcja rasteryzacji): dla każdego <i>obiektu</i> wyznacza się jego wpływ na odpowiednie piksele (fragmenty). Wykonuje się rzutowanie, określanie widoczności/zasłaniania, cieniowanie, rasteryzację. Znając wszystkie fragmenty związane z pikselem, wyznacza się jego barwę końcową.</p>
+<p><b>Obrazowe</b>: dla każdego <i>piksela</i> znajduje się wszystkie obiekty, które na niego wpływają, i wyznacza barwę bezpośrednio. Przykład: <b>śledzenie promieni</b> (ray tracing). Stosuje się inne algorytmy, w szczególności <b>nie występuje problem rasteryzacji</b>.</p>
+<p>Skrót: obiektowe — pętla po obiektach; obrazowe — pętla po pikselach.</p>`},
+{lec:1,type:'mc',d:1,q:'Metoda śledzenia promieni (ray tracing) jest przykładem renderingu…',opts:['obiektowego, opartego na rasteryzacji','obrazowego, w którym nie występuje problem rasteryzacji','obiektowego, ale bez cieniowania','wektorowego'],c:1,
+a:`<p>Ray tracing to podejście <b>obrazowe</b>: dla każdego piksela szuka się obiektów, które na niego wpływają, więc rasteryzacja nie jest potrzebna.</p>`},
+{lec:1,type:'open',d:2,q:'Czym różni się generowanie animacji do filmu od generowania obrazów w grze komputerowej lub symulatorze?',
+a:`<p>W filmach (reklamy, animacje, pełny metraż) sekwencje obrazów generuje się <b>off-line</b> i potem wyświetla z wymaganą częstotliwością — czas obliczeń nie jest krytyczny.</p>
+<p>W grach i symulatorach wymagana jest <b>interakcja z użytkownikiem</b>, więc kolejne obrazy trzeba obliczać <b>na bieżąco</b> (w czasie rzeczywistym), w czasie wyznaczonym przez częstotliwość odświeżania.</p>`},
+{lec:1,type:'open',d:2,src:true,q:'Porównaj grafikę wektorową z grafiką rastrową.',
+a:`<p><b>Wektorowa</b>: każdy obiekt opisany matematycznie zestawem danych; algorytmy generują z nich obraz cyfrowy. Pozwala definiować i edytować każdy obiekt <b>w dowolnej rozdzielczości</b>. Pamięta się tylko dane potrzebne do wygenerowania obrazu, więc zwykle zajmuje <b>mniej pamięci</b>.</p>
+<p><b>Rastrowa</b> (obraz pikselowy): nie ma już informacji o obiektach, z których składa się obraz. Można operować tylko na całym obrazie, pojedynczych pikselach albo grupach pikseli. Zmiana rozdzielczości oznacza <b>utratę jakości</b>. Zwykle potrzeba <b>znacznie więcej pamięci</b>.</p>
+<p>W fazie generowania obrazów (2D i 3D) używa się grafiki wektorowej; obraz wyświetlany jest zawsze rastrowy.</p>`},
+{lec:1,type:'mc',d:1,q:'Masz obraz cyfrowy (rastrowy) diagramu złożonego z kilku prostokątów. Co jest niemożliwe bez ponownego „rysowania”?',opts:['Zmiana jasności całego obrazu','Przesunięcie jednego prostokąta jako obiektu','Zmiana barwy wybranej grupy pikseli','Zmniejszenie rozdzielczości'],c:1,
+a:`<p>W obrazie rastrowym nie ma informacji o obiektach — są tylko piksele. Operacje na „prostokącie jako obiekcie” wymagają opisu wektorowego.</p>`},
+{lec:1,type:'open',d:2,q:'Wymień trzy etapy procesu generowania obrazu i opisz, co obejmuje każdy z nich.',
+a:`<ol><li><b>Modelowanie</b> — obliczenia związane z generowaniem sceny: obiekty i ich parametry, oświetlenie, kamera.</li>
+<li><b>Rendering</b> — ciąg obliczeń prowadzący do cyfrowego obrazu gotowego do wyświetlenia.</li>
+<li><b>Wyświetlanie</b> — zapewnia poprawne wyświetlenie obrazu na ekranie monitora.</li></ol>`},
+{lec:1,type:'open',d:3,q:'Dlaczego to rendering, a nie modelowanie, wymaga sprzętowego wspomagania (GPU)? Podaj trzy argumenty z wykładu.',
+a:`<ul><li>Modelowanie zwykle nie jest wymagające i może być realizowane przez CPU.</li>
+<li>W renderingu duża część obliczeń dotyczy wierzchołków, ale <b>wynikiem są barwy wszystkich pikseli</b>, których jest <b>wielokrotnie więcej</b> niż wierzchołków na wejściu.</li>
+<li>Obliczenia muszą się zmieścić w <b>bardzo krótkim czasie</b>, narzuconym przez urządzenie wyświetlające.</li></ul>
+<p>Dlatego potrzebne są karty graficzne z procesorami GPU oraz optymalizacja algorytmów pod kątem czasu wykonania.</p>`},
+{lec:1,type:'mc',d:1,q:'Który etap generowania obrazu wykład wskazuje jako zwykle niewymagający obliczeniowo i realizowany przez jednostkę centralną?',opts:['Rendering','Rasteryzacja','Modelowanie','Wyświetlanie'],c:2,a:`<p><b>Modelowanie</b>. Rendering jest „zdecydowanie bardziej wymagający” i korzysta z GPU.</p>`},
+{lec:1,type:'open',d:1,src:true,q:'Wyjaśnij zasadę wyświetlania rastrowego w monitorze.',
+a:`<p>Piksele obrazu wyświetlane są <b>sekwencyjnie</b>: najpierw kolejno wszystkie piksele pierwszego wiersza, potem drugiego itd. aż do ostatniego wiersza. Informacje o barwach pobierane są z <b>pamięci obrazu</b>.</p>
+<p>Różnica względem kina: tam cała klatka filmu jest wyświetlana od razu w całości.</p>`},
+{lec:1,type:'open',d:2,q:'Jak powstaje barwny piksel na ekranie i jak realizują to monitory CRT, LCD i OLED?',
+a:`<p>Barwa piksela opisana jest zwykle składowymi <b>R, G, B</b>. Wyświetla się obok siebie trzy małe barwne punkty R, G i B; oglądane z pewnej odległości „zlewają się” w jeden barwny piksel.</p>
+<ul><li><b>CRT</b>: trzy plamki luminoforów (triady) świecące po pobudzeniu strumieniami elektronów.</li>
+<li><b>LCD</b>: trzy sąsiednie komórki LCD z filtrami R, G, B.</li>
+<li><b>OLED</b>: trzy diody świecące składające się na piksel.</li></ul>`},
+{lec:1,type:'mc',d:1,q:'Jaka minimalna częstotliwość wyświetlania jest przyjmowana na wykładzie, aby uniknąć migotania?',opts:['24–30 Hz','50 Hz','70–80 Hz','144 Hz'],c:2,a:`<p>Wykład podaje, że częstotliwość wyświetlania powinna być <b>nie mniejsza niż 70–80 Hz</b>; wtedy jeden obraz trwa kilkanaście milisekund.</p>`},
+{lec:1,type:'calc',d:2,q:'Monitor 1920 × 1080 wyświetla obrazy z częstotliwością 80 Hz. Ile czasu (w nanosekundach) przypada na wyświetlenie jednego piksela? Pomiń czasy przejść między pikselami i klatkami.',v:6.03,tol:0.12,unit:'ns',
+a:`<div class="steps">czas klatki   = 1 / 80 Hz = 12,5 ms
+liczba pikseli = 1920 · 1080 = 2 073 600
+czas piksela   = 12,5 ms / 2 073 600 ≈ 6,03 · 10⁻⁹ s ≈ 6 ns</div>
+<p>Uwaga: w materiałach wykładu we wzorze pojawia się „12,5 s” — to literówka, powinno być 12,5 ms. Wartość ~6 ns jest przybliżona, bo pominięto czasy powrotu między wierszami i klatkami.</p>`},
+{lec:1,type:'calc',d:2,q:'Monitor 4K (3840 × 2160) odświeża obraz z częstotliwością 60 Hz. Ile nanosekund przypada na jeden piksel?',v:2.01,tol:0.06,unit:'ns',
+a:`<div class="steps">czas klatki = 1/60 s ≈ 16,67 ms
+pikseli     = 3840 · 2160 = 8 294 400
+czas piksela = 16,67 ms / 8 294 400 ≈ 2,01 ns</div><p>Widać, że wzrost rozdzielczości szybciej skraca czas na piksel niż spadek częstotliwości go wydłuża.</p>`},
+{lec:1,type:'calc',d:1,q:'Ile milisekund ma system na obliczenie kolejnej klatki przy monitorze 144 Hz (bez gubienia klatek)?',v:6.94,tol:0.05,unit:'ms',
+a:`<div class="steps">1 / 144 Hz ≈ 0,006944 s ≈ 6,94 ms</div><p>Obliczenie nowego obrazu powinno zakończyć się przed końcem wyświetlania bieżącego, więc budżet to czas jednej klatki.</p>`},
+{lec:1,type:'open',d:2,src:true,q:'Wyjaśnij działanie podwójnego bufora pamięci obrazu. Dlaczego się go stosuje?',
+a:`<p>Podczas wyświetlania jednego obrazu obliczany jest już następny. Gdyby nowe piksele zapisywać do tej samej pamięci, z której trwa odczyt, na ekranie mieszałyby się dwa obrazy.</p>
+<p>Dlatego używa się <b>dwóch buforów</b>: obraz wyświetlany jest z jednego, a nowy obraz zapisywany do drugiego. Po zakończeniu cyklu wyświetlania i obliczania <b>role buforów zamieniają się</b>. Metodę nazywa się <b>ping-pong</b>.</p>`},
+{lec:1,type:'calc',d:2,q:'Ile megabajtów (1 MB = 10⁶ B) pamięci zajmuje podwójny bufor obrazu 2560 × 1440 przy 24 bitach na piksel?',v:22.12,tol:0.15,unit:'MB',
+a:`<div class="steps">jeden bufor = 2560 · 1440 · 24 b = 88 473 600 b = 11 059 200 B ≈ 11,06 MB
+dwa bufory  = 2 · 11,06 MB ≈ 22,12 MB</div>`},
+{lec:1,type:'open',d:2,q:'Co się dzieje, gdy system nie nadąża z obliczaniem klatek? Wyjaśnij związek FPS z częstotliwością monitora.',
+a:`<p>Przy złożonych scenach system oblicza mniej klatek na sekundę (<b>FPS</b>) niż wynika z wymagań monitora. Wtedy niektóre klatki są <b>wyświetlane dwukrotnie</b>. Pojawia się problem <b>synchronizacji</b> między stałą częstotliwością wyświetlania monitora a zmienną liczbą klatek obliczanych przez system.</p>`},
+{lec:1,type:'mc',d:1,q:'Który program wykład podaje jako darmowe narzędzie do grafiki 3D i animacji?',opts:['Inkscape','Blender','Corel Draw','3D Studio Max'],c:1,a:`<p><b>Blender</b>. Inkscape to darmowy edytor 2D; Corel Draw i Illustrator to profesjonalne edytory 2D; 3D Studio Max to profesjonalny program 3D.</p>`},
+
+/* ================= WYKŁAD II ================= */
+{lec:2,type:'open',d:1,src:true,q:'Wyjaśnij pojęcie piksela.',
+a:`<p><b>Piksel</b> to cyfrowa reprezentacja próbki obrazu: próbka uzyskana w procesie próbkowania, której barwę skwantowano do najbliższej barwy z dopuszczalnego zbioru barw systemu. Obraz cyfrowy to prostokątna matryca m × n pikseli, a położenie piksela p opisują współrzędne x<sub>p</sub>, y<sub>p</sub>.</p>`},
+{lec:2,type:'open',d:2,src:true,q:'Wyjaśnij pojęcia: próbkowanie obrazu i kwantowanie próbki.',
+a:`<p>Obraz rzeczywisty jest ciągły: ma nieskończenie wiele punktów, a każdy może przyjmować nieskończenie wiele wartości. Reprezentacja cyfrowa wymaga dwóch ograniczeń:</p>
+<ul><li><b>Próbkowanie</b> ogranicza <i>liczbę punktów</i>. Na obraz nakłada się siatkę prostokątną; każdy węzeł to jedna próbka. Im więcej próbek, tym lepsze przybliżenie.</li>
+<li><b>Kwantowanie</b> ogranicza <i>liczbę wartości</i>. Barwie próbki B<sub>pr</sub> przypisuje się najbliższą barwę B<sub>piks</sub> z dopuszczalnego zbioru barw; liczność tego zbioru wynika z długości słowa reprezentującego barwy.</li></ul>`},
+{lec:2,type:'mc',d:1,q:'Kwantowanie w procesie cyfryzacji obrazu ogranicza…',opts:['liczbę punktów obrazu','liczbę wartości, które może przyjąć próbka','rozdzielczość liniową monitora','proporcje boków obrazu'],c:1,a:`<p>Kwantowanie dotyczy <b>wartości</b> (barw) próbek. Liczbę punktów ogranicza próbkowanie.</p>`},
+{lec:2,type:'open',d:2,q:'Dlaczego konwersja obrazu cyfrowego z powrotem na „ciągły” nie wymaga żadnych operacji?',
+a:`<p>Odbywa się ona w trakcie obserwacji wyświetlanego obrazu przez człowieka. System wzrokowy odbiera informację dyskretną (obraz cyfrowy) jako ciągłą — pod warunkiem dostatecznie dobrej wizualizacji.</p>`},
+{lec:2,type:'open',d:3,q:'Porównaj punktowy i powierzchniowy model reprezentacji piksela. Jak różnią się współrzędne piksela w obu modelach?',
+a:`<p><b>Punktowy</b>: próbki utożsamia się z <b>węzłami</b> siatki; piksel jest nieskończenie małym punktem. Współrzędne to numery wiersza i kolumny węzła.</p>
+<p><b>Powierzchniowy</b>: próbki utożsamia się z <b>oczkami</b> siatki; próbce przypisuje się barwę <b>uśrednioną</b> w obrębie oczka. Współrzędne to <b>środek oczka</b>, czyli przesunięcie o <b>½ skoku siatki</b> względem modelu punktowego.</p>
+<p>Oba modele są przybliżeniem: prawdziwe piksele ani nie są nieskończenie małe, ani nie wypełniają ekranu w sposób ciągły. W praktyce używa się tego, który jest wygodniejszy.</p>`},
+{lec:2,type:'mc',d:2,q:'W modelu powierzchniowym współrzędne piksela są przesunięte względem modelu punktowego o…',opts:['1 skok siatki','½ skoku siatki','¼ skoku siatki','nie są przesunięte'],c:1,a:`<p>Współrzędne odpowiadają środkowi oczka siatki, czyli przesunięciu o <b>½ skoku</b>.</p>`},
+{lec:2,type:'open',d:2,q:'Czym różnią się rozdzielczość pikselowa, rozdzielczość liniowa (ppi) i dpi?',
+a:`<ul><li><b>Rozdzielczość pikselowa</b> (np. 1920 × 1080): liczba pikseli w poziomie i w pionie. Nie zależy od fizycznych rozmiarów obrazu.</li>
+<li><b>Rozdzielczość liniowa, ppi</b>: liczba pikseli wyświetlanych na odcinku 1 cala. Decyduje o wielkości obrazu na konkretnym urządzeniu.</li>
+<li><b>dpi</b>: odpowiednik dla drukarek — liczba punktów, które drukarka może wydrukować na 1 calu.</li></ul>`},
+{lec:2,type:'mc',d:1,q:'Jaki stosunek szerokości do wysokości mają obecnie najczęściej spotykane rozdzielczości pikselowe, a jaki był dawniej?',opts:['16:10, dawniej 5:4','16:9, dawniej 4:3','21:9, dawniej 16:9','4:3, dawniej 1:1'],c:1,a:`<p>Obecnie najczęściej <b>16/9</b>, dawniej <b>4/3</b>.</p>`},
+{lec:2,type:'calc',d:2,q:'Oblicz rozdzielczość liniową (ppi) monitora 1920 × 1080 o przekątnej 42 cali i proporcjach 16:9.',v:52.4,tol:1.2,unit:'ppi',
+a:`<div class="steps">boki: a = 16x, b = 9x
+42² = (16x)² + (9x)² = 337x²  →  x = 42/√337 ≈ 2,288″
+szerokość a = 16 · 2,288 ≈ 36,6″
+ppi = 1920 / 36,6 ≈ 52,5   (wykład: ≈ 52 ppi)</div>`},
+{lec:2,type:'calc',d:2,q:'Oblicz ppi monitora 27″ o rozdzielczości 2560 × 1440 (16:9).',v:108.8,tol:1.2,unit:'ppi',
+a:`<div class="steps">sposób 1: x = 27/√337 ≈ 1,4708″, szerokość = 16x ≈ 23,53″
+          ppi = 2560 / 23,53 ≈ 108,8
+sposób 2: przekątna w pikselach = √(2560² + 1440²) ≈ 2937,2
+          ppi = 2937,2 / 27 ≈ 108,8</div><p>Drugi sposób jest szybszy i działa dla dowolnych proporcji, o ile piksele są kwadratowe.</p>`},
+{lec:2,type:'calc',d:1,q:'Obraz 1920 × 1080 drukujesz bezpośrednio na drukarce 1200 dpi (1 piksel = 1 punkt). Jaka będzie szerokość wydruku w centymetrach?',v:4.06,tol:0.1,unit:'cm',
+a:`<div class="steps">1920 / 1200 = 1,6″
+1,6 · 2,54 cm ≈ 4,06 cm   (wykład: ≈ 4 cm)
+wysokość: 1080 / 1200 = 0,9″ ≈ 2,29 cm</div>`},
+{lec:2,type:'calc',d:1,q:'Ten sam obraz 1920 × 1080 drukujesz na drukarce 1600 dpi. Jaka będzie wysokość wydruku w centymetrach?',v:1.71,tol:0.05,unit:'cm',
+a:`<div class="steps">1080 / 1600 = 0,675″
+0,675 · 2,54 ≈ 1,71 cm
+(szerokość: 1920/1600 = 1,2″ ≈ 3,05 cm)</div><p>Większe dpi → mniejszy wydruk przy tej samej liczbie pikseli.</p>`},
+{lec:2,type:'open',d:1,q:'Co oznaczają terminy „mapa pikseli”, „mapa bitowa” i „bitmapa”? Czy „bitmapa” oznacza obraz 1-bitowy?',
+a:`<p>Wszystkie trzy określają obraz przedstawiony w postaci matrycy pikseli. Nazw „mapa bitowa” i „bitmapa” używa się <b>niezależnie od liczby bitów</b> na piksel, więc bitmapa nie musi być obrazem 1-bitowym.</p>`},
+{lec:2,type:'calc',d:1,src:true,q:'Oblicz pamięć potrzebną do zapamiętania obrazu 1024 × 768 × 24 (24 bity na piksel). Wynik podaj w MB (przyjmij 1 MB = 10⁶ B; jeśli liczysz w MiB, wynik też zostanie uznany).',v:2.36,tol:0.12,alt:[2.25],unit:'MB',
+a:`<div class="steps">1024 · 768 · 24 = 18 874 368 b
+/ 8 = 2 359 296 B
+≈ 2,36 MB  (10⁶ B)   lub   = 2,25 MiB  (2²⁰ B)</div>`},
+{lec:2,type:'calc',d:1,q:'Ile megabitów (Mb, 10⁶ b) zajmuje obraz 1920 × 1080 przy 24 bitach na piksel?',v:49.77,tol:0.1,unit:'Mb',
+a:`<div class="steps">1920 · 1080 · 24 = 49 766 400 b ≈ 49,77 Mb
+w bajtach: / 8 = 6 220 800 B ≈ 6,22 MB</div>`},
+{lec:2,type:'mc',d:2,q:'Które stwierdzenie o obrazie cyfrowym jest zgodne z wykładem?',opts:['Rozdzielczość pikselowa to stała cecha obrazu','Liczba bitów na piksel to stała cecha obrazu','Ani rozdzielczość pikselowa, ani liczba bitów na piksel nie są stałymi cechami obrazu','Rozdzielczość pikselowa zależy od rozmiaru monitora'],c:2,
+a:`<p>Ten sam obraz można przedstawić przy różnych rozdzielczościach i różnej liczbie bitów na piksel, zależnie od potrzeb oraz możliwości urządzeń próbkujących, pamiętających czy wyświetlających.</p>`},
+{lec:2,type:'open',d:2,q:'Ile bitów na składową barwy wystarcza do obrazów fotorealistycznych i dlaczego nie warto zwiększać tej liczby bez końca?',
+a:`<p>Na ogół wystarcza <b>8 bitów</b> na luminancję albo na każdą ze składowych R, G, B; czasem potrzeba <b>10 lub 12 bitów</b>.</p>
+<p>Dalsze zwiększanie napotyka <b>barierę sensowności</b>: ludzki wzrok ma ograniczoną zdolność rozróżniania barw, więc dodatkowe bity nie dają widocznej poprawy.</p>`},
+{lec:2,type:'open',d:2,q:'Co ogranicza sensowny wzrost rozdzielczości monitorów? Podaj regułę praktyczną z wykładu.',
+a:`<p>Jedyne sensowne ograniczenie to <b>skończona zdolność oka do rozróżniania szczegółów</b>. Reguła praktyczna: człowiek rozróżnia szczegóły w obrębie kąta około <b>1 minuty kątowej</b> (1′ = 1/60°). Przy typowej odległości od ekranu ~0,5 m pozwala to oszacować sensowną rozdzielczość.</p>`},
+{lec:2,type:'calc',d:3,q:'Obserwator ogląda obraz o szerokości 30 cm z odległości 50 cm. Rozróżnia szczegóły w kącie 1′. Ile pikseli w poziomie jest w stanie rozróżnić? (Wykład zaokrągla kąt do całych stopni.)',v:2040,tol:45,alt:[2004],unit:'px',
+a:`<div class="steps">tg(α/2) = 15 / 50 = 0,3
+α/2 ≈ 16,7°   →   α ≈ 33,4°   (wykład zaokrągla: α ≈ 34°)
+1° = 60′
+pikseli ≈ 34 · 60 = 2040   (bez zaokrąglenia: 33,4 · 60 ≈ 2004)</div>`},
+{lec:2,type:'calc',d:3,q:'Obraz ma szerokość 50 cm, oglądasz go z odległości 50 cm. Przy zdolności rozdzielczej oka 1′ — ile pikseli w poziomie ma sens? (Nie zaokrąglaj kąta.)',v:3188,tol:40,unit:'px',
+a:`<div class="steps">tg(α/2) = 25 / 50 = 0,5
+α/2 ≈ 26,57°   →   α ≈ 53,13°
+pikseli ≈ 53,13 · 60 ≈ 3188</div><p>Im bliżej i im szerszy obraz, tym większa rozdzielczość ma sens.</p>`},
+{lec:2,type:'open',d:3,q:'Opisz krok po kroku, jak wyznacza się wartość piksela N nowej siatki przy zmianie rozdzielczości (interpolacja z pikseli A, B, C, D).',
+a:`<p>Nowa siatka (docelowa rozdzielczość) jest nałożona na starą. Piksel N leży w kwadracie ABCD; jego położenie opisują parametry α (w poziomie) i β (w pionie).</p>
+<ol><li>Interpolacja na odcinku AB: <code>P1 = αB + (1−α)A</code></li>
+<li>Interpolacja na odcinku CD: <code>P2 = αD + (1−α)C</code></li>
+<li>Interpolacja między P1 i P2: <code>N = βP2 + (1−β)P1</code></li></ol>
+<p>To interpolacja liniowa wykonana dwukrotnie w poziomie i raz w pionie (interpolacja dwuliniowa).</p>`},
+{lec:2,type:'calc',d:2,src:true,q:'Oblicz jasność piksela N przy zmianie rozdzielczości: A = 30, B = 50, C = 45, D = 60, α = 0,4, β = 0,2.',v:40.6,tol:0.05,unit:'',
+a:`<div class="steps">P1 = αB + (1−α)A = 0,4·50 + 0,6·30 = 20 + 18 = 38
+P2 = αD + (1−α)C = 0,4·60 + 0,6·45 = 24 + 27 = 51
+N  = βP2 + (1−β)P1 = 0,2·51 + 0,8·38 = 10,2 + 30,4 = 40,6</div>`},
+{lec:2,type:'calc',d:2,q:'Interpolacja: A = 100, B = 200, C = 0, D = 40, α = 0,75, β = 0,5. Oblicz N.',v:102.5,tol:0.05,unit:'',
+a:`<div class="steps">P1 = 0,75·200 + 0,25·100 = 150 + 25 = 175
+P2 = 0,75·40  + 0,25·0   = 30
+N  = 0,5·30 + 0,5·175 = 15 + 87,5 = 102,5</div>`},
+{lec:2,type:'mc',d:2,q:'Przy interpolacji N = βP2 + (1−β)P1 piksel N leży dokładnie na odcinku AB. Jakie jest wtedy β?',opts:['β = 0','β = 0,5','β = 1','β = α'],c:0,a:`<p>Dla β = 0 mamy N = P1, czyli punkt na odcinku AB. Dla β = 1 punkt leży na odcinku CD.</p>`},
+
+/* ================= WYKŁAD III ================= */
+{lec:3,type:'open',d:2,q:'Dlaczego barwa nie jest właściwością fizyczną obiektu? Jakie czynniki wpływają na postrzeganą barwę?',
+a:`<p>Barwa to <b>wrażenie percepcyjne</b> człowieka, wywołane pobudzeniem układu wzrokowego falami elektromagnetycznymi z zakresu widzialnego. Ostatecznej interpretacji dokonuje mózg.</p>
+<p>Na wrażenie barwy wpływają m.in.: rodzaj źródła światła, właściwości odbijania światła przez obiekty, czułość obserwatora na poszczególne długości fal. Z tego powodu opis i specyfikacja barwy są trudne.</p>`},
+{lec:3,type:'mc',d:1,q:'Jaki przybliżony zakres długości fal obejmuje widmo widzialne według wykładu?',opts:['100–400 nm','380–780 nm','500–1000 nm','780–1500 nm'],c:1,a:`<p>Od <b>380 nm do 780 nm</b> (wartości przybliżone).</p>`},
+{lec:3,type:'open',d:1,src:true,q:'Co to są barwy monochromatyczne? Podaj przykład barwy, która nie jest monochromatyczna.',
+a:`<p>Barwy <b>monochromatyczne</b> to barwy związane z <b>jedną długością fali</b>.</p>
+<p>Przykład barwy niemonochromatycznej: <b>purpury</b> — nie odpowiadają żadnej pojedynczej długości fali; powstają z kombinacji dwóch fal z przeciwległych końców widma (niebieskiej i czerwonej).</p>`},
+{lec:3,type:'open',d:2,src:true,q:'Co kryje się za pojęciem „metamery”? Podaj przykład z wykładu.',
+a:`<p><b>Metamery</b> to różne kombinacje składowych widmowych, które wywołują <b>takie samo wrażenie barwy</b>.</p>
+<p>Przykład: kombinacja fal <b>610 nm i 540 nm</b> o odpowiednich natężeniach daje taką samą barwę jak pojedyncza fala <b>575 nm</b>.</p>
+<p>Na metamerii opiera się wyświetlanie barw: monitor nie odtwarza widma, tylko dobiera mieszankę R, G, B, którą oko odbiera tak samo.</p>`},
+{lec:3,type:'open',d:2,q:'Porównaj pręciki i czopki. Ile jest typów czopków i jak to się wiąże z RGB?',
+a:`<p><b>Pręciki</b>: czułe w całym zakresie widma, receptory „luminancji”, odpowiadają za widzenie przy słabym oświetleniu (zmierzchowe).</p>
+<p><b>Czopki</b>: mniejsza czułość, potrzebują więcej światła, umożliwiają percepcję barw. Są trzy typy: <b>L, M, S</b>, z maksimami czułości w okolicach barw czerwonej, zielonej i niebieskiej.</p>
+<p>Skoro są trzy typy receptorów barwy, to dobierając trzy źródła światła i ich udziały, można wywołać wrażenie żądanej barwy. Na tym opiera się użycie R, G, B w urządzeniach wyświetlających.</p>`},
+{lec:3,type:'open',d:2,q:'Porównaj mieszanie addytywne i subtraktywne. Gdzie stosuje się każde z nich i jakie są barwy podstawowe?',
+a:`<p><b>Addytywne</b>: barwę uzyskuje się przez <b>dodawanie</b> światła trzech źródeł. Urządzenia wyświetlające; barwy podstawowe <b>R, G, B</b>.</p>
+<p><b>Subtraktywne</b> (różnicowe): pigmenty <b>pochłaniają</b> część widma światła białego, a obserwujemy to, co zostało odbite. Druk; barwy podstawowe <b>C (cyjan), M (magenta), Y (żółty)</b>.</p>
+<p>Oba podejścia to uproszczenie: nie da się dobrać trzech barw podstawowych reprodukujących dowolną barwę.</p>`},
+{lec:3,type:'open',d:3,q:'Wymień trzy sposoby charakteryzowania barwy podane na wykładzie.',
+a:`<ol><li><b>Teoria trójchromatyczna</b> (prawo Grassmanna): każdą barwę percepcyjną można określić za pomocą trzech liniowo niezależnych barw, których nie da się uzyskać z pozostałych. Ważone kombinacje barw podstawowych tworzą metamery barw percepcyjnych.</li>
+<li><b>Teoria barw przeciwstawnych</b>: kodowanie trzema przeciwstawnymi składowymi <b>R–G, B–Y, K–W</b>; jeden wymiar to jasność, dwa pozostałe opisują chrominancję (nieintuicyjne).</li>
+<li><b>Opis percepcyjny</b>: trzy właściwości wpływające na percepcję — <b>odcień barwy, jasność, nasycenie</b>.</li></ol>`},
+{lec:3,type:'mc',d:1,q:'Ile odcieni szarości rozróżnia przeciętny obserwator według wykładu?',opts:['około 30','około 100','około 256','około 1000'],c:1,a:`<p>Około <b>100</b>. Dlatego słowo 8-bitowe (256 odcieni) w zupełności wystarcza do skali szarości.</p>`},
+{lec:3,type:'calc',d:1,q:'Ile bitów potrzeba minimalnie, by zakodować co najmniej 100 rozróżnialnych odcieni szarości?',v:7,tol:0,unit:'bitów',
+a:`<div class="steps">2⁶ = 64 &lt; 100   za mało
+2⁷ = 128 ≥ 100  wystarcza  →  7 bitów</div><p>W praktyce stosuje się 8 bitów (256 odcieni), bo bajt jest naturalną jednostką.</p>`},
+{lec:3,type:'open',d:2,q:'Opisz model RGB: jak wygląda, gdzie leżą barwy podstawowe, czarna, biała i szarości?',
+a:`<p>Model RGB to <b>sześcian jednostkowy</b> w układzie współrzędnych R, G, B; każdy punkt to barwa uzyskana przez mieszanie składowych.</p>
+<ul><li>Wierzchołki: R, G, B, C, M, Y, czarna <b>K</b> (0,0,0) i biała <b>W</b> (1,1,1).</li>
+<li>Na <b>przekątnej K–W</b> leżą odcienie szarości.</li></ul>`},
+{lec:3,type:'open',d:2,src:true,q:'Uzasadnij stwierdzenie: „model RGB wykorzystywany w grafice komputerowej ma budowę dyskretną”.',
+a:`<p>Każda składowa R, G, B jest reprezentowana słowem o skończonej długości, więc może przyjąć tylko skończoną liczbę wartości. Przy 8 bitach na składową piksel ma 24 bity, a liczba różnych barw to <b>2²⁴ ≈ 16,7 mln</b> — skończony zbiór punktów sześcianu, a nie ciągły sześcian.</p>`},
+{lec:3,type:'calc',d:1,q:'Ile różnych barw można zakodować przy 10 bitach na każdą składową R, G, B? Podaj w milionach.',v:1073.74,tol:1,unit:'mln',
+a:`<div class="steps">3 · 10 = 30 bitów
+2³⁰ = 1 073 741 824 ≈ 1073,7 mln (≈ 1,07 mld)</div><p>Dla porównania: 24 bity → 2²⁴ = 16 777 216 ≈ 16,7 mln barw.</p>`},
+{lec:3,type:'open',d:2,src:true,q:'Czy za pomocą trzech barw podstawowych R, G i B można uzyskać dowolną barwę widzialną?',
+a:`<p><b>Nie.</b> Na wykresie chromatyczności wszystkie barwy RGB leżą wewnątrz trójkąta o wierzchołkach R, G, B, a poza nim pozostaje wiele barw widzialnych. Monitor nigdy nie wyświetli barw spoza swojego trójkąta.</p>
+<p>Co więcej, <b>żaden</b> zestaw trzech rzeczywistych barw widzialnych nie pozwala uzyskać wszystkich barw widzialnych — dlatego CIE XYZ opiera się na barwach teoretycznych.</p>`},
+{lec:3,type:'mc',d:1,q:'Przeciętny obserwator rozróżnia około … barw. Uzupełnij wartość podaną na wykładzie.',opts:['16,7 miliona','10 milionów','1 miliard','100 tysięcy'],c:1,a:`<p>Około <b>10 milionów</b>. 24-bitowe RGB daje 16,7 mln kombinacji, ale i tak nie obejmuje wszystkich barw widzialnych.</p>`},
+{lec:3,type:'open',d:2,q:'Na czym polega model CMY i po co w praktyce dodaje się czerń (CMYK)?',
+a:`<p>CMY to sześcian jednostkowy w układzie C, M, Y; model <b>subtraktywny</b>, dyskretny, nie obejmuje wszystkich barw widzialnych. Barwa wydruku powstaje przez <b>odjęcie od światła białego</b> części widma pochłanianej przez farby.</p>
+<p>W <b>CMYK</b> dodaje się barwę czarną, bo czerń uzyskana z samych C, M i Y jest gorsza niż czerń z osobnej farby czarnej.</p>`},
+{lec:3,type:'mc',d:2,q:'Barwa RGB = (1; 0,5; 0) (pomarańczowa). Jakie są jej składowe CMY? (C = 1−R, M = 1−G, Y = 1−B)',opts:['(0; 0,5; 1)','(1; 0,5; 0)','(0,5; 0; 1)','(0; 1; 0,5)'],c:0,
+a:`<div class="steps">C = 1 − 1   = 0
+M = 1 − 0,5 = 0,5
+Y = 1 − 0   = 1</div><p>CMY to „dopełnienie” RGB: cyjan pochłania czerwień, magenta zieleń, żółty niebieski.</p>`},
+{lec:3,type:'open',d:2,q:'Opisz model HSV: znaczenie i zakres każdego parametru oraz geometrię modelu.',
+a:`<ul><li><b>H</b> (Hue, odcień): w stopniach 0°–360°.</li>
+<li><b>S</b> (Saturation, nasycenie): 0–1 (0–100%); 100% to czysta barwa monochromatyczna, 0% to barwa biała (achromatyczna).</li>
+<li><b>V</b> (Value, jasność): od 0 (czerń) do 1 (biel).</li></ul>
+<p>Geometria (stożek/ostrosłup, czasem walec): na <b>obwodzie</b> przekroju poziomego leżą barwy nasycone, <b>wewnątrz</b> — nienasycone; o jasności decyduje odległość przekroju od punktu K (czerń). Na osi V leżą szarości.</p>
+<p>Model jest uważany za <b>intuicyjny</b>: wybiera się odcień H, potem nasycenie i jasność. Ostatecznie barwa i tak jest konwertowana do RGB.</p>`},
+{lec:3,type:'mc',d:1,q:'Barwa w HSV ma S = 0. Co to oznacza?',opts:['Jest czarna','Jest czystą barwą widmową','Jest szarością (leży na osi V)','Ma odcień 0°, czyli czerwony'],c:2,a:`<p>Nasycenie 0 oznacza brak barwy chromatycznej — punkt leży na osi V, czyli jest odcieniem szarości (od czerni do bieli, zależnie od V). Wartość H jest wtedy bez znaczenia.</p>`},
+{lec:3,type:'mc',d:1,q:'Czym różni się model HLS od HSV według wykładu?',opts:['HLS nie ma składowej odcienia','HLS jest modelem pochodnym, w którym L oznacza jasność (Lightness)','HLS jest modelem subtraktywnym','HLS obejmuje wszystkie barwy widzialne'],c:1,a:`<p>HLS to model <b>pochodny</b> od HSV, a jego składowa <b>L</b> to jasność (Lightness). Oba są intuicyjne i używane w pakietach graficznych.</p>`},
+{lec:3,type:'open',d:3,q:'Dlaczego powstał model CIE XYZ i jak z niego otrzymuje się współrzędne x, y oraz model xyY?',
+a:`<p>Żaden z modeli opartych na rzeczywistych barwach nie obejmuje wszystkich barw widzialnych, bo w widmie nie ma trzech takich barw podstawowych. W <b>1931 r.</b> CIE przyjęła trzy <b>teoretyczne</b> barwy podstawowe X, Y, Z (bez rzeczywistych odpowiedników); model z założenia reprezentuje wszystkie barwy widzialne.</p>
+<p>Dla wygody każdą współrzędną dzieli się przez sumę:</p>
+<div class="steps">x = X/(X+Y+Z)   y = Y/(X+Y+Z)   z = Z/(X+Y+Z)
+x + y + z = 1   →   wystarczą x i y,  z = 1 − x − y</div>
+<p>Barwę zapisuje się w modelu <b>xyY</b>, gdzie Y to <b>luminancja</b>.</p>`},
+{lec:3,type:'calc',d:1,q:'Barwa ma współrzędne chromatyczności x = 0,3, y = 0,4. Ile wynosi z?',v:0.3,tol:0.001,unit:'',
+a:`<div class="steps">z = 1 − x − y = 1 − 0,3 − 0,4 = 0,3</div>`},
+{lec:3,type:'open',d:2,src:true,q:'Omów wykres chromatyczności.',
+a:`<ul><li>Zbudowany we współrzędnych <b>x, y</b> (z modelu CIE xyY).</li>
+<li>Na <b>krzywoliniowej</b> części obwodu leżą wszystkie nasycone barwy widmowe.</li>
+<li>Na <b>odcinku w dolnej części</b> leżą purpury.</li>
+<li>W środku leży punkt <b>W</b> (biel); wewnątrz leżą barwy nienasycone.</li>
+<li>Reprezentuje wszystkie barwy widzialne z dokładnością do luminancji.</li>
+<li>Mieszanina dwóch barw leży na <b>odcinku</b> je łączącym; mieszanina trzech — wewnątrz <b>trójkąta</b> o wierzchołkach w barwach pierwotnych.</li>
+<li>Można na nim pokazać gamut urządzenia, np. trójkąt RGB monitora.</li>
+<li>Wada: xyY <b>nie jest percepcyjnie równomierna</b>.</li></ul>`},
+{lec:3,type:'mc',d:1,q:'Gdzie na wykresie chromatyczności leżą purpury?',opts:['Na krzywoliniowej części obwodu','Na odcinku w dolnej części wykresu','W punkcie W','W centrum trójkąta RGB'],c:1,a:`<p>Purpury nie są barwami widmowymi, więc nie leżą na krzywej widmowej, tylko na <b>prostym odcinku</b> zamykającym wykres od dołu.</p>`},
+{lec:3,type:'mc',d:2,q:'Na wykresie chromatyczności mieszasz barwy A, B i C. Gdzie leży wynik?',opts:['Na krzywej barw widmowych','Poza trójkątem ABC','Wewnątrz trójkąta ABC','Zawsze w punkcie bieli W'],c:2,a:`<p>Mieszanina dwóch barw leży na odcinku je łączącym, a trzech — <b>wewnątrz trójkąta</b> o wierzchołkach w barwach pierwotnych. Stąd trójkąt RGB monitora to jego gamut.</p>`},
+{lec:3,type:'open',d:2,q:'Dlaczego potoczne pojęcie „barwa biała” jest niejednoznaczne? Podaj trzy biele z wykładu.',
+a:`<p>Istnieje wiele bieli i ich definicji; część opiera się na <b>ciele doskonale czarnym</b>.</p>
+<ul><li><b>Biel 6500 (D65)</b>: barwa ciała doskonale czarnego w 6500 K, odpowiada światłu dziennemu (x = 0,3127, y = 0,3297).</li>
+<li><b>Biel równoenergetyczna E</b>: x = y = 0,333.</li>
+<li><b>Biel C</b>: światło słoneczne w południe (x = 0,3101, y = 0,3162).</li></ul>`},
+{lec:3,type:'mc',d:2,q:'W jakim celu CIE w 1976 r. wprowadziła współrzędne u′, v′?',opts:['Aby obsłużyć druk CMYK','Aby przestrzeń była bardziej percepcyjnie równomierna','Aby usunąć luminancję','Aby dodać purpury do wykresu'],c:1,a:`<p>Przestrzeń xyY <b>nie jest percepcyjnie równomierna</b> — jednakowe zmiany parametrów nie dają jednakowych zmian postrzeganych barw. Współrzędne u′, v′ zmniejszają tę wadę.</p>`},
+{lec:3,type:'open',d:2,q:'Opisz model L*a*b*: genezę, składowe z zakresami i główną zaletę.',
+a:`<p>Opracowany przez CIE w <b>1976 r.</b> na bazie <b>teorii barw przeciwstawnych</b>: nie mówimy o barwach „czerwono-zielonych” ani „żółto-niebieskich”, choć postrzegamy np. czerwono-niebieskie.</p>
+<ul><li><b>L*</b> — jasność, 0–100</li><li><b>a*</b> — położenie między zieloną a czerwoną, −128 ÷ 128</li><li><b>b*</b> — położenie między niebieską a żółtą, −128 ÷ 128</li></ul>
+<p>Zaleta: łatwe <b>porównywanie barw</b> — różnicę liczy się jak odległość euklidesową w 3D. Model jest <b>niezależny od urządzenia</b> (tak jak CIE XYZ).</p>`},
+{lec:3,type:'calc',d:2,q:'Oblicz różnicę barw (odległość euklidesową) w L*a*b* między (50, 10, 20) a (53, 6, 20).',v:5,tol:0.01,unit:'',
+a:`<div class="steps">ΔL = 3, Δa = −4, Δb = 0
+ΔE = √(3² + 4² + 0²) = √25 = 5</div>`},
+{lec:3,type:'mc',d:1,q:'Które modele barw wykład wskazuje jako niezależne od urządzenia?',opts:['RGB i CMY','HSV i HLS','CIE XYZ i CIE L*a*b*','sRGB i CMYK'],c:2,a:`<p><b>CIE XYZ</b> i <b>CIE L*a*b*</b>. Dlatego właśnie one służą jako wspólna przestrzeń w systemach zarządzania barwą.</p>`},
+{lec:3,type:'open',d:2,q:'Czym jest gamut urządzenia i dlaczego utrudnia wierną reprodukcję barw? Jakie są proste sposoby radzenia sobie z tym problemem?',
+a:`<p><b>Gamut</b> (gama kolorów) to zestaw barw dostępnych na danym urządzeniu (skaner, aparat, monitor, drukarka). Różne urządzenia mają różne gamuty, więc barwa dostępna na jednym może być nieosiągalna na drugim.</p>
+<ul><li>Ograniczenie się do <b>części wspólnej</b> gamutów obu urządzeń.</li>
+<li><b>Standaryzacja</b> modelu barw, np. <b>sRGB</b> (HP i Microsoft) lub <b>Adobe RGB</b> (biel D65).</li>
+<li><b>Systemy zarządzania barwą</b> (CMS).</li></ul>`},
+{lec:3,type:'open',d:3,src:true,q:'Wyjaśnij przeznaczenie i zasadę działania Systemów Zarządzania Barwą (CMS).',
+a:`<p>Cel: spójna reprodukcja barw na urządzeniach o różnych gamutach.</p>
+<ol><li>Obrazy przechowuje się w <b>jednej wspólnej przestrzeni barw niezależnej od urządzeń</b> (np. CIE XYZ lub L*a*b*).</li>
+<li>Każde urządzenie ma <b>profil</b>, który opisuje odwzorowanie między jego modelem barw a przestrzenią wspólną.</li>
+<li>Obraz z urządzenia źródłowego trafia do systemu <b>razem z profilem</b>, jest konwertowany do przestrzeni wspólnej i w niej przechowywany.</li>
+<li>Urządzenie docelowe przesyła swój profil, a system konwertuje obraz do jego modelu barw.</li></ol>`},
+
+/* ================= WYKŁAD IV ================= */
+{lec:4,type:'open',d:1,q:'Czym są prymitywy w grafice 2D i do czego służą algorytmy rasteryzacji?',
+a:`<p><b>Prymitywy</b> to podstawowe obiekty grafiki 2D, np. odcinki, okręgi, trójkąty. Każdy opisany jest zestawem parametrów.</p>
+<p><b>Rasteryzacja</b> zamienia ten opis na postać pikselową: wyznacza piksele krawędzi obiektu i ewentualnie wypełnia jego wnętrze.</p>`},
+{lec:4,type:'open',d:2,q:'Opisz naiwną metodę rysowania odcinka z równania prostej i wyjaśnij, jak algorytm DDA zmniejsza liczbę operacji.',
+a:`<p><b>Naiwnie</b>: prosta <code>y = mx + b</code>, m = tg α. Dla każdej kolumny x<sub>i</sub> liczy się y<sub>i</sub> i wybiera najbliższy piksel w tej kolumnie. Koszt na piksel: <b>mnożenie, dodawanie, zaokrąglenie</b>.</p>
+<p><b>DDA</b>: przy stałym nachyleniu i odstępie kolumn równym 1 kolejne y różni się o stały przyrost Δy = m:</p>
+<div class="steps">y(i+1) = y(i) + m</div>
+<p>Koszt na piksel: <b>jedno dodawanie zmiennopozycyjne i zaokrąglenie</b> — oszczędzamy mnożenie. Przy dziesiątkach odcinków po dziesiątki pikseli w każdej klatce to znacząca oszczędność.</p>`},
+{lec:4,type:'mc',d:1,q:'Jakie operacje wykonuje algorytm DDA dla każdego kolejnego piksela odcinka?',opts:['Mnożenie, dodawanie i zaokrąglenie','Jedno dodawanie zmiennopozycyjne i zaokrąglenie','Jedno dodawanie stałopozycyjne','Podnoszenie do kwadratu i pierwiastkowanie'],c:1,a:`<p>DDA: <code>y(i+1) = y(i) + m</code> — dodawanie zmiennopozycyjne i zaokrąglenie. Bresenham schodzi jeszcze niżej: jedno dodawanie <b>stałopozycyjne</b>.</p>`},
+{lec:4,type:'open',d:2,q:'Dlaczego przy nachyleniu odcinka większym niż 45° trzeba wybierać piksele w kolejnych wierszach, a nie kolumnach?',
+a:`<p>Przy stromym odcinku y zmienia się o więcej niż 1 między sąsiednimi kolumnami. Wybierając jeden piksel na kolumnę, dostalibyśmy <b>za mało pikseli</b> — odcinek byłby „dziurawy”. Dla kątów 45°–90° iteruje się po <b>wierszach</b> (rola x i y się zamienia).</p>`},
+{lec:4,type:'calc',d:2,q:'Odcinek od (0,0) do (3,10). Ile pikseli dałoby (błędne) wybieranie po jednym pikselu w każdej kolumnie, a ile poprawne wybieranie po wierszach? Wpisz liczbę pikseli przy wybieraniu po wierszach.',v:11,tol:0,unit:'px',
+a:`<div class="steps">po kolumnach: x = 0,1,2,3      →  4 piksele (dziury między nimi)
+po wierszach: y = 0,1,…,10     → 11 pikseli</div><p>Liczba pikseli powinna odpowiadać większemu z |Δx|, |Δy| (plus 1).</p>`},
+{lec:4,type:'open',d:3,q:'Wyjaśnij tok rozumowania Bresenhama: między którymi pikselami wybiera algorytm i na podstawie czego?',
+a:`<p>Założenie: 0 &lt; m &lt; 1. Po wyznaczeniu piksela w kolumnie x<sub>i</sub>, w kolumnie x<sub>i+1</sub> są tylko <b>dwa kandydaty</b>: piksel w tym samym wierszu i piksel o jeden wiersz wyżej.</p>
+<p>Kryterium to znak różnicy <b>D1 − D2</b> odległości kandydatów od punktu leżącego na rzeczywistym odcinku. Minus → piksel <b>górny</b>, plus → piksel <b>dolny</b>. Po przekształceniach różnicę zastępuje parametr decyzyjny p<sub>k</sub>, liczony tylko na liczbach całkowitych.</p>`},
+{lec:4,type:'open',d:2,q:'Zapisz pełny algorytm Bresenhama rysowania odcinka (dla 0 &lt; m &lt; 1).',
+a:`<ol><li>Wybierz koniec o <b>mniejszym x</b> jako (x<sub>1</sub>, y<sub>1</sub>) — pierwszy piksel.</li>
+<li>Oblicz: <code>Δx = x2 − x1</code>, <code>Δy = y2 − y1</code>, <code>a = 2Δy</code>, <code>b = 2Δy − 2Δx</code>, <code>p0 = 2Δy − Δx</code>.</li>
+<li>Dla kolejnych kolumn, od k = 0:<br>
+• jeśli <code>p<sub>k</sub> &lt; 0</code>: następny piksel <code>(x<sub>k</sub>+1, y<sub>k</sub>)</code>, <code>p<sub>k+1</sub> = p<sub>k</sub> + a</code><br>
+• w przeciwnym razie (także p = 0): <code>(x<sub>k</sub>+1, y<sub>k</sub>+1)</code>, <code>p<sub>k+1</sub> = p<sub>k</sub> + b</code></li>
+<li>Powtarzaj krok 3 do końca odcinka.</li></ol>
+<p>Na każdy piksel przypada <b>jedno dodawanie stałopozycyjne</b>.</p>`},
+{lec:4,type:'mc',d:2,q:'Dlaczego w algorytmie Bresenhama zawsze zaczyna się od końca o mniejszej współrzędnej x?',opts:['Bo inaczej p0 byłoby ujemne','Bo algorytm nie zawsze daje ten sam wynik przy starcie z różnych końców, więc przyjęto stałą zasadę','Bo ekran rysuje od lewej do prawej','Bo inaczej trzeba by mnożyć'],c:1,a:`<p>Przy remisach (p = 0) start z różnych końców może dać różne piksele. Żeby wynik był jednoznaczny, przyjęto zasadę startu od mniejszego x.</p>`},
+{lec:4,type:'mc',d:1,q:'W algorytmie Bresenhama p<sub>k</sub> = 0. Który piksel zostanie wybrany?',opts:['(x<sub>k</sub>+1, y<sub>k</sub>) — ten sam wiersz','(x<sub>k</sub>+1, y<sub>k</sub>+1) — wiersz wyżej','Oba','Żaden — algorytm się zatrzymuje'],c:1,a:`<p>Warunek „p<sub>k</sub> &lt; 0” jest ostry, więc dla p = 0 wykonuje się gałąź „w przeciwnym przypadku”: piksel o wiersz wyżej i <code>p += b</code>. Tak jest w przykładzie z wykładu: p0 = 0 → (3,3).</p>`},
+{lec:4,type:'open',d:2,q:'Wykonaj algorytm Bresenhama dla odcinka (2,2)–(8,5). Podaj wszystkie piksele i wartości p.',
+a:`<div class="steps">Δx = 6, Δy = 3, a = 2Δy = 6, b = 2Δy − 2Δx = −6
+p0 = 2Δy − Δx = 0
+start (2,2)
+p0 =  0 ≥ 0 → (3,3)  p1 = 0 − 6 = −6
+p1 = −6 &lt; 0 → (4,3)  p2 = −6 + 6 = 0
+p2 =  0 ≥ 0 → (5,4)  p3 = −6
+p3 = −6 &lt; 0 → (6,4)  p4 = 0
+p4 =  0 ≥ 0 → (7,5)  p5 = −6
+p5 = −6 &lt; 0 → (8,5)  koniec</div>
+${grid({x0:1,y0:1,x1:9,y1:6,px:[[2,2],[3,3],[4,3],[5,4],[6,4],[7,5],[8,5]],line:[[2,2],[8,5]],title:'Odcinek (2,2)-(8,5)'})}`},
+{lec:4,type:'calc',d:2,q:'Bresenham dla odcinka (0,0)–(7,3). Ile wynosi p<sub>0</sub>?',v:-1,tol:0,unit:'',
+a:`<div class="steps">Δx = 7, Δy = 3
+a = 2Δy = 6, b = 2Δy − 2Δx = −8
+p0 = 2Δy − Δx = 6 − 7 = −1
+(0,0)
+p=−1 → (1,0) p=5
+p= 5 → (2,1) p=−3
+p=−3 → (3,1) p=3
+p= 3 → (4,2) p=−5
+p=−5 → (5,2) p=1
+p= 1 → (6,3) p=−7
+p=−7 → (7,3)</div>
+${grid({x0:0,y0:0,x1:7,y1:3,px:[[0,0],[1,0],[2,1],[3,1],[4,2],[5,2],[6,3],[7,3]],line:[[0,0],[7,3]],title:'Odcinek (0,0)-(7,3)'})}`},
+{lec:4,type:'open',d:2,src:true,q:'Algorytmem Bresenhama wyznacz piksele odcinka (2,3)–(6,7).',
+a:`<div class="steps">Δx = 4, Δy = 4  (m = 1, kąt dokładnie 45°)
+a = 8, b = 0, p0 = 2·4 − 4 = 4
+(2,3)
+p=4 ≥ 0 → (3,4) p = 4 + 0 = 4
+p=4 ≥ 0 → (4,5) p = 4
+p=4 ≥ 0 → (5,6) p = 4
+p=4 ≥ 0 → (6,7)</div><p>Przy m = 1 b = 0, więc p nigdy się nie zmienia i za każdym razem idziemy po przekątnej.</p>
+${grid({x0:1,y0:2,x1:7,y1:8,px:[[2,3],[3,4],[4,5],[5,6],[6,7]],line:[[2,3],[6,7]],title:'Odcinek (2,3)-(6,7)'})}`},
+{lec:4,type:'open',d:3,src:true,q:'Algorytmem Bresenhama wyznacz piksele odcinka (2,3)–(4,8). Uwaga na nachylenie.',
+a:`<p>Δx = 2, Δy = 5 → m = 2,5 &gt; 1 (kąt &gt; 45°). Iterujemy po <b>wierszach</b>: zamieniamy role x i y.</p>
+<div class="steps">„długa” oś = y: Δy = 5, „krótka” oś = x: Δx = 2
+a = 2Δx = 4, b = 2Δx − 2Δy = −6
+p0 = 2Δx − Δy = 4 − 5 = −1
+(2,3)
+p=−1 &lt; 0 → (2,4) p = 3
+p= 3 ≥ 0 → (3,5) p = −3
+p=−3 &lt; 0 → (3,6) p = 1
+p= 1 ≥ 0 → (4,7) p = −5
+p=−5 &lt; 0 → (4,8)</div>
+<p>Sprawdzenie z równania x = 2 + 0,4(y − 3): dla y = 4…7 mamy x = 2,4 / 2,8 / 3,2 / 3,6 → zaokrąglenia 2, 3, 3, 4 ✓</p>
+${grid({x0:1,y0:2,x1:5,y1:9,px:[[2,3],[2,4],[3,5],[3,6],[4,7],[4,8]],line:[[2,3],[4,8]],title:'Odcinek (2,3)-(4,8)'})}`},
+{lec:4,type:'open',d:2,src:true,q:'Skąd bierze się problem aliasingu i czy można jego efekty całkowicie wyeliminować?',
+a:`<p>Aliasing to <b>efekt schodkowy</b>: kształt obiektu na rastrze odbiega od idealnego, a przy obracaniu odcinka zmienia się wzór ułożenia pikseli. Przyczyna: <b>skończona rozdzielczość rastra</b>.</p>
+<p><b>Nie da się go usunąć żadną metodą</b>, można go tylko zmniejszać (metody antyaliasingowe). Zwiększanie rozdzielczości monitorów czyni go mniej zauważalnym, ale on nadal istnieje — widać to np. przy powiększeniu obrazu na dużym ekranie.</p>`},
+{lec:4,type:'open',d:2,q:'Opisz metodę antyaliasingu z dwoma pikselami w kolumnie.',
+a:`<p>W każdej kolumnie wybiera się <b>dwa piksele</b> najbliższe punktowi na idealnym odcinku. Ich odcienie szarości zależą od odległości: im bliżej punktu, tym <b>ciemniejszy</b> piksel. <b>Suma odcieni obu pikseli jest stała.</b> Gdy jeden piksel leży dostatecznie blisko odcinka, w kolumnie wyświetla się tylko on.</p>`},
+{lec:4,type:'open',d:2,q:'Na czym polega antyaliasing pełnoekranowy (FSAA)? Czym różni się od antyaliasingu w czasie rasteryzacji?',
+a:`<p>Antyaliasing może działać <b>w czasie rasteryzacji</b> konturów, albo — częściej w praktyce — <b>po wygenerowaniu</b> całego obrazu (pełnoekranowy).</p>
+<p><b>FSAA</b>: obraz generuje się w rozdzielczości <b>większej niż docelowa</b>, a przy przejściu do docelowej <b>uśrednia się barwy sąsiednich pikseli</b>.</p>`},
+{lec:4,type:'open',d:3,q:'Dlaczego rysowanie okręgu z równania x² + y² = r² (y = √(r² − x²) dla kolejnych x) jest złym pomysłem? Podaj oba powody.',
+a:`<ul><li><b>Koszt obliczeń</b>: podnoszenie do kwadratu i pierwiastkowanie dla każdego piksela.</li>
+<li><b>Nierównomierne rozmieszczenie pikseli</b>: krok po x jest stały, ale nachylenie okręgu rośnie przy zbliżaniu się do x = r. Tam y zmienia się o wiele pikseli między sąsiednimi kolumnami, więc powstają <b>przerwy</b> — ten sam problem co przy odcinku o nachyleniu &gt; 45°.</li></ul>
+<p>Metoda punktu środkowego liczy tylko jeden oktant, w którym nachylenie nie przekracza 1, a resztę otrzymuje z symetrii.</p>`},
+{lec:4,type:'open',d:2,q:'Jak wykorzystuje się symetrię okręgu? Podaj 7 pikseli symetrycznych do piksela (x, y).',
+a:`<p>Okrąg o środku w (0,0) ma symetrię względem osi i przekątnych, więc wystarczy policzyć <b>jeden oktant (1/8)</b>.</p>
+<div class="steps">( y,  x)   (−x,  y)   (−y,  x)
+( x, −y)   ( y, −x)   (−x, −y)   (−y, −x)</div>
+<p>Razem z (x, y) daje to 8 pikseli z jednego obliczenia. Dla okręgu o środku (x<sub>c</sub>, y<sub>c</sub>) dodaje się przesunięcie.</p>`},
+{lec:4,type:'open',d:3,q:'Wyjaśnij ideę metody punktu środkowego (mid point) dla okręgu.',
+a:`<p>Funkcja <code>f(x,y) = x² + y² − r²</code> ma znak: 0 na okręgu, &gt; 0 na zewnątrz, &lt; 0 wewnątrz.</p>
+<p>W pierwszym oktancie (od (0,r), x rośnie) po pikselu w kolumnie x<sub>i</sub> w kolumnie x<sub>i+1</sub> są dwa kandydaty: piksel w <b>tym samym wierszu</b> i piksel <b>wiersz niżej</b>. Bada się <b>punkt środkowy</b> między nimi:</p>
+<ul><li>punkt środkowy <b>wewnątrz</b> okręgu (p &lt; 0) → wybieramy piksel <b>górny</b> (ten sam wiersz),</li>
+<li>punkt środkowy <b>na zewnątrz lub na okręgu</b> → piksel <b>dolny</b>.</li></ul>
+<p>Podobnie jak u Bresenhama, kryterium sprowadza się do kilku prostych operacji przyrostowych.</p>`},
+{lec:4,type:'open',d:2,q:'Zapisz algorytm rysowania okręgu metodą punktu środkowego (środek w (0,0), promień r).',
+a:`<ol><li>Start: <code>(0, r)</code>, <code>p0 = 5/4 − r</code>.</li>
+<li>Dla kolejnych kolumn od k = 0:<br>
+• <code>p<sub>k</sub> &lt; 0</code>: następny <code>(x<sub>k</sub>+1, y<sub>k</sub>)</code>, <code>p<sub>k+1</sub> = p<sub>k</sub> + 2x<sub>k+1</sub> + 1</code><br>
+• inaczej: <code>(x<sub>k</sub>+1, y<sub>k</sub>−1)</code>, <code>p<sub>k+1</sub> = p<sub>k</sub> + 2x<sub>k+1</sub> + 1 − 2y<sub>k+1</sub></code></li>
+<li>Wyznacz 7 pikseli symetrycznych.</li>
+<li>Powtarzaj kroki 2–3, aż <code>x = y</code>.</li></ol>
+<p>W wersjach całkowitoliczbowych często przyjmuje się p0 = 1 − r (zaokrąglenie 5/4 − r) — daje te same piksele.</p>`},
+{lec:4,type:'mc',d:1,q:'Kiedy kończy się obliczanie pikseli pierwszego oktantu w metodzie punktu środkowego?',opts:['Gdy x = r','Gdy y = 0','Gdy x = y','Po r krokach'],c:2,a:`<p>Gdy <b>x = y</b> — to przekątna, granica oktantu. Dalsze piksele otrzymuje się z symetrii.</p>`},
+{lec:4,type:'calc',d:2,q:'Ile wynosi początkowy parametr decyzyjny p<sub>0</sub> dla okręgu o promieniu r = 16 (wzór z wykładu)?',v:-14.75,tol:0.001,unit:'',
+a:`<div class="steps">p0 = 5/4 − r = 1,25 − 16 = −14,75</div>`},
+{lec:4,type:'open',d:3,src:true,q:'Znajdź czwarty piksel okręgu o środku w (0,0) i promieniu r = 16.',
+a:`<div class="steps">p0 = 5/4 − 16 = −14,75
+piksel 1: (0,16)
+p0 = −14,75 &lt; 0 → piksel 2: (1,16)   p1 = −14,75 + 2·1 + 1 = −11,75
+p1 = −11,75 &lt; 0 → piksel 3: (2,16)   p2 = −11,75 + 2·2 + 1 = −6,75
+p2 = −6,75  &lt; 0 → piksel 4: (3,16)   p3 = −6,75 + 2·3 + 1 = 0,25
+p3 =  0,25 ≥ 0 → piksel 5: (4,15)   p4 = 0,25 + 9 − 30 = −20,75</div>
+<p><b>Czwarty piksel: (3, 16)</b>, licząc punkt startowy (0,16) jako pierwszy. Jeśli liczysz tylko piksele wyznaczone w pętli, czwarty to (4, 15) — warto podać na kolokwium, którą konwencję przyjmujesz.</p>`},
+{lec:4,type:'open',d:3,q:'Wyznacz metodą punktu środkowego wszystkie piksele pierwszego oktantu okręgu o r = 10.',
+a:`<div class="steps">p0 = 5/4 − 10 = −8,75
+(0,10)
+p=−8,75 → (1,10)  p = −8,75 + 3        = −5,75
+p=−5,75 → (2,10)  p = −5,75 + 5        = −0,75
+p=−0,75 → (3,10)  p = −0,75 + 7        =  6,25
+p= 6,25 → (4,9)   p = 6,25 + 9 − 18    = −2,75
+p=−2,75 → (5,9)   p = −2,75 + 11       =  8,25
+p= 8,25 → (6,8)   p = 8,25 + 13 − 16   =  5,25
+p= 5,25 → (7,7)   x = y → koniec</div>
+${grid({x0:0,y0:5,x1:10,y1:11,px:[[0,10],[1,10],[2,10],[3,10],[4,9],[5,9],[6,8],[7,7]],circle:10,title:'Oktant okręgu r=10'})}`},
+{lec:4,type:'open',d:2,q:'Dla jakich innych krzywych istnieją proste algorytmy i co robić z krzywą, której równania nie znamy?',
+a:`<ul><li>Tak proste algorytmy jak dla odcinka i okręgu istnieją dla niewielu obiektów, np. <b>elipsy</b>.</li>
+<li>Dla innych krzywych z równaniem: liczy się y dla kolejnych x i zaokrągla do najbliższego piksela; czasem pomaga symetria (np. sinusoida).</li>
+<li>Bez równania: rysowanie interakcyjne albo krzywe wielomianowe specjalnego typu, np. <b>krzywe Béziera</b>.</li>
+<li>Liniom i konturom można nadawać atrybuty: styl (ciągła, przerywana, kropkowana), grubość, kolor.</li></ul>`},
+{lec:4,type:'open',d:2,q:'Opisz metodę wypełniania przeglądaniem wierszami (scan line): założenia i dwie fazy.',
+a:`<p>Założenie: znane są <b>równania konturu</b>.</p>
+<ol><li><b>Faza 1</b>: dla każdego wiersza rastra wyznacza się przecięcia z konturami i łączy je w <b>pary</b> (1–2, 3–4, 5–6…), między którymi leży wnętrze.</li>
+<li><b>Faza 2</b>: wypełnia się odcinki wyznaczone przez te pary.</li></ol>
+<p>Dla wielokątów wypukłych to proste. Przy niewypukłych trzeba uważać na <b>wierzchołki</b>.</p>`},
+{lec:4,type:'open',d:3,q:'Jakie dwa rodzaje wierzchołków trzeba rozróżnić w metodzie scan line i jak je liczyć, żeby pary przecięć się zgadzały?',
+a:`<ul><li><b>Lokalne ekstremum</b>: obie krawędzie leżą <b>po jednej stronie</b> linii rastra. Linia rastra tylko „dotyka” wielokąta, więc wierzchołek liczy się <b>dwa razy</b> (albo wcale) — parzystość przecięć zostaje zachowana.</li>
+<li><b>Wierzchołek przejściowy</b>: krawędzie leżą <b>po obu stronach</b> linii rastra. Linia faktycznie przechodzi przez brzeg, więc wierzchołek liczy się <b>raz</b>.</li></ul>
+<p>Pomyłka w liczeniu przesuwa parowanie i wypełnienie „wylewa się” na zewnątrz. Wykład opisuje sam podział na dwie klasy; sposób liczenia to standardowe rozwiązanie wynikające z tego podziału.</p>`},
+{lec:4,type:'open',d:2,q:'Opisz metodę wypełniania z punktem początkowym (seed fill).',
+a:`<p>Założenia: na ekranie jest <b>zamknięty kontur</b> i znany jest <b>punkt wewnątrz</b>.</p>
+<ol><li>Od punktu początkowego idź w lewo wzdłuż wiersza do brzegu, potem w prawo do brzegu.</li>
+<li>Przejdź do wiersza powyżej (zaczynając nad punktem początkowym) i powtarzaj, dopóki się da.</li>
+<li>Potem tak samo w wierszach poniżej.</li>
+<li>Prowadź <b>listę aktywnych pikseli</b> (na obrzeżu wypełnionego obszaru) i w razie potrzeby kontynuuj od pierwszego z nich.</li></ol>
+<p>Działa dla konturów <b>wypukłych, niewypukłych, a nawet niespójnych</b>.</p>`},
+{lec:4,type:'mc',d:2,q:'Która cecha odróżnia metodę z punktem początkowym od metody przeglądania wierszami?',opts:['Wymaga znajomości równań konturu','Działa tylko dla wielokątów wypukłych','Wymaga narysowanego konturu i punktu wewnątrz, nie równań','Nie potrafi wypełnić obszarów niewypukłych'],c:2,a:`<p>Scan line potrzebuje <b>równań konturu</b>; seed fill — <b>narysowanego konturu na ekranie</b> i punktu we wnętrzu.</p>`},
+{lec:4,type:'open',d:2,q:'Czym są współrzędne barycentryczne i jak służą do sprawdzania, czy piksel należy do trójkąta?',
+a:`<p>Dla trójkąta ABC punkt U zapisujemy jako</p>
+<div class="steps">U = αA + βB + γC,   α + β + γ = 1</div>
+<p>Wewnątrz trójkąta α, β, γ ≥ 0. Jeśli <b>wszystkie</b> współrzędne są dodatnie — piksel jest wewnątrz; jeśli <b>choć jedna jest ujemna</b> — na zewnątrz. Zero oznacza punkt na krawędzi.</p>`},
+{lec:4,type:'calc',d:2,q:'Wyznacz współrzędną α punktu U(2,2) w trójkącie A(1,2), B(2,3), C(5,1).',v:0.6,tol:0.005,unit:'',
+a:`<div class="steps">x:  2 = α + 2β + 5γ
+y:  2 = 2α + 3β + γ
+    1 = α + β + γ
+α = 1 − β − γ   →   x: β + 4γ = 1,   y: β − γ = 0
+β = γ = 1/5,   α = 3/5 = 0,6</div><p>Wszystkie dodatnie → punkt wewnątrz trójkąta.</p>`},
+{lec:4,type:'calc',d:3,src:true,q:'Czy punkt (2,1) należy do trójkąta o wierzchołkach A(1,3), B(4,1), C(3,4)? Oblicz γ (współczynnik przy C).',v:-0.5714,tol:0.005,unit:'',
+a:`<div class="steps">x:  2 = α + 4β + 3γ
+y:  1 = 3α + β + 4γ
+    1 = α + β + γ
+α = 1 − β − γ
+x:  1 + 3β + 2γ = 2   →  3β + 2γ = 1
+y:  3 − 2β + γ  = 1   →  γ = 2β − 2
+3β + 4β − 4 = 1  →  β = 5/7
+γ = −4/7 ≈ −0,571,   α = 6/7
+sprawdzenie: (6·1 + 5·4 − 4·3)/7 = 2 ✓, (6·3 + 5·1 − 4·4)/7 = 1 ✓</div>
+<p>γ &lt; 0, więc <b>punkt (2,1) nie należy do trójkąta</b>.</p>`},
+{lec:4,type:'calc',d:2,q:'W trójkącie f(A) = 10, f(B) = 40, f(C) = 100. Punkt U ma współrzędne barycentryczne α = 3/5, β = 1/5, γ = 1/5. Oblicz f(U).',v:34,tol:0.01,unit:'',
+a:`<div class="steps">f(U) = αf(A) + βf(B) + γf(C)
+     = 0,6·10 + 0,2·40 + 0,2·100 = 6 + 8 + 20 = 34</div>`},
+{lec:4,type:'mc',d:1,q:'Które trzy rodzaje wypełniania wnętrza figury wymienia wykład?',opts:['Ciągłe, tonalne, teksturą','Wektorowe, rastrowe, mieszane','Addytywne, subtraktywne, tonalne','Punktowe, powierzchniowe, liniowe'],c:0,a:`<p><b>Jednolitą barwą</b> (ciągłe), <b>zmienną barwą</b> (tonalne) i <b>teksturą</b>. Liniom i brzegom zwykle przypisuje się jedną, z góry ustaloną barwę.</p>`},
+{lec:4,type:'open',d:2,q:'Opisz metodę Gouraud wypełniania tonalnego trójkąta. Jakie ma ograniczenie?',
+a:`<ol><li>Znane są jasności (barwy) trzech wierzchołków.</li>
+<li>Na lewej krawędzi (I1–I2) <b>interpolacja liniowa</b> daje jasność w każdym punkcie przecięcia z linią rastra; tak samo na prawej krawędzi (I1–I3).</li>
+<li>Na odcinku wiersza wewnątrz trójkąta, znając jasności końców Ia i Ib, interpoluje się jasność każdego piksela (np. Ic).</li>
+<li>Powtarza się dla wszystkich wierszy.</li></ol>
+<p>Równoważnie: <code>c<sub>p</sub> = αc0 + βc1 + γc2</code> ze współrzędnych barycentrycznych.</p>
+<p><b>Ograniczenie</b>: zestaw barw wewnątrz trójkąta jest ograniczony przez barwy wierzchołków — nie da się uzyskać np. jasnego odblasku na środku ściany o ciemnych wierzchołkach.</p>`},
+{lec:4,type:'calc',d:2,q:'Gouraud: krawędź trójkąta ma jasność I1 = 200 w górnym wierzchołku i I2 = 50 w dolnym. Linia rastra przecina krawędź w 1/4 jej długości licząc od góry. Jaka jest jasność w punkcie przecięcia?',v:162.5,tol:0.05,unit:'',
+a:`<div class="steps">I = I1 + t·(I2 − I1),  t = 0,25
+I = 200 + 0,25·(50 − 200) = 200 − 37,5 = 162,5</div>`},
+{lec:4,type:'calc',d:3,q:'Gouraud: na wierszu rastra lewy koniec odcinka ma jasność Ia = 80 (x = 10), prawy Ib = 160 (x = 30). Jaką jasność dostanie piksel x = 15?',v:100,tol:0.05,unit:'',
+a:`<div class="steps">t = (15 − 10) / (30 − 10) = 0,25
+Ic = Ia + t·(Ib − Ia) = 80 + 0,25·80 = 100</div><p>Przy przejściu do kolejnego piksela jasność rośnie o stałe (160−80)/20 = 4, więc w praktyce liczy się ją przyrostowo, jak w DDA.</p>`},
+{lec:4,type:'mc',d:3,q:'Dlaczego kolejne algorytmy rysowania odcinka (równanie prostej → DDA → Bresenham) są coraz lepsze?',opts:['Dają ładniejszy wynik bez aliasingu','Zmniejszają liczbę i koszt operacji na piksel','Rysują więcej pikseli','Działają dla dowolnych krzywych'],c:1,a:`<p>Wszystkie dają podobne piksele; zysk to <b>szybkość</b>: mnożenie + dodawanie + zaokrąglenie → dodawanie zmiennopozycyjne + zaokrąglenie → jedno dodawanie stałopozycyjne. Przypomina to wymaganie z wykładu I: obraz trzeba obliczyć w kilkanaście milisekund.</p>`}
+];
+
+/* ---------- state ---------- */
+const LKEY='grk-w14-progress-v1';
+let prog={};try{prog=JSON.parse(localStorage.getItem(LKEY)||'{}')||{}}catch(e){prog={}}
+function save(){try{localStorage.setItem(LKEY,JSON.stringify(prog))}catch(e){}}
+Q.forEach((q,i)=>q.id='q'+i);
+let order=Q.map((_,i)=>i);
+const F={lec:0,type:'all',status:'all'};
+const LEC=['Wszystkie','I · Wiadomości ogólne','II · Reprezentacja obrazu','III · Barwa','IV · Rasteryzacja'];
+const ROMAN=['','I','II','III','IV'];
+const TYPES=[['all','Wszystkie'],['open','Otwarte'],['mc','Test'],['calc','Obliczenia']];
+const TNAME={open:'Pytanie otwarte',mc:'Test',calc:'Obliczenia'};
+
+function chips(el,items,key){
+  items.forEach(([v,l])=>{const b=document.createElement('button');b.className='chip';b.textContent=l;b.setAttribute('aria-pressed',String(F[key]===v));
+    b.onclick=()=>{F[key]=v;[...el.querySelectorAll('.chip')].forEach(c=>c.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');render()};el.appendChild(b)});
+}
+chips(document.getElementById('f-lec'),LEC.map((l,i)=>[i,l]),'lec');
+chips(document.getElementById('f-type'),TYPES,'type');
+const st={all:'f-status-all',new:'f-status-new',rev:'f-status-rev'};
+Object.entries(st).forEach(([v,id])=>{document.getElementById(id).onclick=e=>{F.status=v;Object.values(st).forEach(x=>document.getElementById(x).setAttribute('aria-pressed','false'));e.currentTarget.setAttribute('aria-pressed','true');render()}});
+document.getElementById('shuffle').onclick=()=>{for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}render()};
+const resetBtn=document.getElementById('reset');let armed=false;
+resetBtn.onclick=()=>{if(!armed){armed=true;resetBtn.textContent='Kliknij ponownie, aby wyczyścić';setTimeout(()=>{armed=false;resetBtn.textContent='Wyczyść postęp'},3000);return}
+  prog={};save();armed=false;resetBtn.textContent='Wyczyść postęp';render()};
+
+function stats(){
+  const k=Q.filter(q=>prog[q.id]==='k').length, r=Q.filter(q=>prog[q.id]==='r').length, n=Q.length;
+  const per=[1,2,3,4].map(l=>{const a=Q.filter(q=>q.lec===l);return `W${ROMAN[l]}: <b>${a.filter(q=>prog[q.id]==='k').length}/${a.length}</b>`}).join(' · ');
+  document.getElementById('stats').innerHTML=`<span>Opanowane <b>${k}</b></span><span>Do powtórki <b>${r}</b></span><span>Wszystkich <b>${n}</b></span><span>${per}</span>`;
+  const bar=document.getElementById('bar');bar.children[0].style.width=(k/n*100)+'%';bar.children[1].style.width=(r/n*100)+'%';
+}
+function setState(q,s,card){prog[q.id]=s;save();stats();paintState(q,card)}
+function paintState(q,card){
+  card.classList.toggle('known',prog[q.id]==='k');card.classList.toggle('review',prog[q.id]==='r');
+  const s=card.querySelector('.state');
+  if(prog[q.id]==='k'){s.hidden=false;s.className='state k';s.textContent='opanowane'}
+  else if(prog[q.id]==='r'){s.hidden=false;s.className='state r';s.textContent='do powtórki'}
+  else s.hidden=true;
+}
+function rate(q,card,box){
+  const d=document.createElement('div');d.className='actions';
+  const a=document.createElement('button');a.className='btn okb';a.textContent='Umiem';a.onclick=()=>setState(q,'k',card);
+  const b=document.createElement('button');b.className='btn rvb';b.textContent='Do powtórki';b.onclick=()=>setState(q,'r',card);
+  d.append(a,b);box.appendChild(d);
+}
+function num(s){return parseFloat(String(s).replace(/\s/g,'').replace(',','.'))}
+
+function card(q){
+  const c=document.createElement('article');c.className='card';
+  const dots=[1,2,3].map(i=>`<i class="${i<=q.d?'on':''}"></i>`).join('');
+  c.innerHTML=`<div class="meta"><span class="tag lec">W${ROMAN[q.lec]}</span><span class="tag">${TNAME[q.type]}</span>${q.src?'<span class="tag">z wykładu</span>':''}<span class="diff" title="Trudność ${q.d}/3">${dots}</span><span class="state" hidden></span></div><p class="q">${q.q}</p>`;
+  const body=document.createElement('div');body.style.display='grid';body.style.gap='10px';c.appendChild(body);
+  const ans=document.createElement('div');ans.className='ans';ans.hidden=true;ans.innerHTML='<span class="k">Odpowiedź</span>'+q.a;
+
+  if(q.type==='mc'){
+    const box=document.createElement('div');box.className='opts';
+    q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.innerHTML=`<span class="k">${'ABCD'[i]}</span><span>${o}</span>`;
+      b.onclick=()=>{[...box.children].forEach((x,j)=>{x.disabled=true;if(j===q.c)x.classList.add('right')});
+        const ok=i===q.c;if(!ok)b.classList.add('wrong');
+        const v=document.createElement('div');v.className='verdict '+(ok?'ok':'bad');v.textContent=ok?'Dobrze.':'Źle — poprawna odpowiedź: '+'ABCD'[q.c]+'.';
+        box.after(v);ans.hidden=false;setState(q,ok?'k':'r',c);};
+      box.appendChild(b)});
+    body.appendChild(box);
+  } else if(q.type==='calc'){
+    const row=document.createElement('div');row.className='calc';
+    const inp=document.createElement('input');inp.id='in-'+q.id;inp.inputMode='decimal';inp.placeholder='wynik';inp.setAttribute('aria-label','Twój wynik');
+    const u=document.createElement('span');u.className='unit';u.textContent=q.unit||'';
+    const chk=document.createElement('button');chk.className='btn';chk.textContent='Sprawdź';
+    const show=document.createElement('button');show.className='btn sec';show.textContent='Pokaż rozwiązanie';
+    const v=document.createElement('span');v.className='verdict';
+    const test=()=>{const x=num(inp.value);if(isNaN(x)){v.className='verdict bad';v.textContent='Wpisz liczbę (przecinek lub kropka).';return}
+      const ok=[q.v,...(q.alt||[])].some(t=>Math.abs(x-t)<=q.tol+1e-9);
+      v.className='verdict '+(ok?'ok':'bad');v.textContent=ok?'Dobrze.':'Nie zgadza się. Spróbuj jeszcze raz albo zobacz rozwiązanie.';
+      if(ok){ans.hidden=false;if(prog[q.id]!=='r')setState(q,'k',c)}else setState(q,'r',c)};
+    chk.onclick=test;inp.onkeydown=e=>{if(e.key==='Enter')test()};
+    show.onclick=()=>{ans.hidden=!ans.hidden;show.textContent=ans.hidden?'Pokaż rozwiązanie':'Ukryj rozwiązanie'};
+    row.append(inp,u,chk,show,v);body.appendChild(row);
+  } else {
+    const row=document.createElement('div');row.className='actions';
+    const show=document.createElement('button');show.className='btn';show.textContent='Pokaż odpowiedź';
+    show.onclick=()=>{ans.hidden=!ans.hidden;show.textContent=ans.hidden?'Pokaż odpowiedź':'Ukryj odpowiedź'};
+    row.appendChild(show);body.appendChild(row);
+  }
+  c.appendChild(ans);
+  if(q.type==='open')rate(q,c,ans);
+  paintState(q,c);
+  return c;
+}
+
+function render(){
+  const list=document.getElementById('list');list.innerHTML='';
+  const items=order.map(i=>Q[i]).filter(q=>(!F.lec||q.lec===F.lec)&&(F.type==='all'||q.type===F.type)&&
+    (F.status==='all'||(F.status==='new'&&!prog[q.id])||(F.status==='rev'&&prog[q.id]==='r')));
+  document.getElementById('count').textContent=`${items.length} ${items.length===1?'pytanie':(items.length%10>=2&&items.length%10<=4&&(items.length%100<10||items.length%100>=20)?'pytania':'pytań')}`;
+  if(!items.length){list.innerHTML='<p class="empty">Brak pytań dla tych filtrów. Zmień wykład, typ albo widok.</p>'}
+  items.forEach(q=>list.appendChild(card(q)));
+  stats();
+}
+render();
+</script>
+
+</body>
+</html>
